@@ -1,48 +1,53 @@
+CONCERT_TICKETS = 'Backstage passes to a TAFKAL80ETC concert'.freeze
+LEGENDARY_ITEM = 'Sulfuras, Hand of Ragnaros'.freeze
+CONJURED_ITEM = 'Conjured Mana Cake'.freeze
+CHEESE = 'Aged Brie'.freeze
+
 def update_quality(items)
   items.each do |item|
-    if item.name != 'Aged Brie' && item.name != 'Backstage passes to a TAFKAL80ETC concert'
-      if item.quality > 0
-        if item.name != 'Sulfuras, Hand of Ragnaros'
-          item.quality -= 1
-        end
-      end
-    else
-      if item.quality < 50
+    case item.name
+    when CONCERT_TICKETS
+      case item.sell_in
+      when 6..10
+        item.quality += 2
+      when 1..5
+        item.quality += 3
+      when 0
+        item.quality = 0
+      else
         item.quality += 1
-        if item.name == 'Backstage passes to a TAFKAL80ETC concert'
-          if item.sell_in < 11
-            if item.quality < 50
-              item.quality += 1
-            end
-          end
-          if item.sell_in < 6
-            if item.quality < 50
-              item.quality += 1
-            end
-          end
-        end
       end
+    when CHEESE
+      sellable?(item) ? item.quality += 1 : item.quality += 2
+    when CONJURED_ITEM
+      sellable?(item) ? item.quality -= 2 : item.quality -= 4
+    when LEGENDARY_ITEM
+      nil
+    else
+      sellable?(item) ? item.quality -= 1 : item.quality -= 2
     end
-    if item.name != 'Sulfuras, Hand of Ragnaros'
+
+    case item.name
+    when LEGENDARY_ITEM
+      nil
+    else
+      ensure_quality_within_range(item)
       item.sell_in -= 1
     end
-    if item.sell_in < 0
-      if item.name != "Aged Brie"
-        if item.name != 'Backstage passes to a TAFKAL80ETC concert'
-          if item.quality > 0
-            if item.name != 'Sulfuras, Hand of Ragnaros'
-              item.quality -= 1
-            end
-          end
-        else
-          item.quality = item.quality - item.quality
-        end
-      else
-        if item.quality < 50
-          item.quality += 1
-        end
-      end
-    end
+  end
+end
+
+private 
+
+def sellable?(item)
+  item.sell_in > 0
+end
+
+def ensure_quality_within_range(item)
+  if item.quality > 50 
+    item.quality = 50
+  elsif item.quality < 0
+    item.quality = 0
   end
 end
 

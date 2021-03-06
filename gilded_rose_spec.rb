@@ -63,13 +63,25 @@ RSpec.shared_examples "A Cheese" do |ref|
 end
 
 RSpec.shared_examples "A Conjured Item" do |ref|
-  describe '#update_quality' do
-    it 'decreases the quality by 2' do
-      expect(items[0].quality).to eq ref.quality - 2
-    end
+  if ref.sell_in > 0
+    describe '#update_quality' do
+      it 'decreases the quality by 2' do
+        expect(items[0].quality).to eq ref.quality - 2
+      end
 
-    it 'decreases the sell_in by 1' do
-      expect(items[0].sell_in).to eq ref.sell_in - 1
+      it 'decreases the sell_in by 1' do
+        expect(items[0].sell_in).to eq ref.sell_in - 1
+      end
+    end
+  else
+    describe '#update_quality' do
+      it 'decreases the quality by 2' do
+        expect(items[0].quality).to eq ref.quality - 4
+      end
+
+      it 'decreases the sell_in by 1' do
+        expect(items[0].sell_in).to eq ref.sell_in - 1
+      end
     end
   end
 end
@@ -96,7 +108,7 @@ RSpec.describe "GildedRose" do
           [ Item.new("Backstage passes to a TAFKAL80ETC concert", 6, 20) ]
         end
 
-        it 'quality increase by 1' do
+        it 'quality increase by 2' do
           expect(items[0].quality).to eq 22
         end
       end
@@ -106,7 +118,7 @@ RSpec.describe "GildedRose" do
           [ Item.new("Backstage passes to a TAFKAL80ETC concert", 5, 20) ]
         end
 
-        it 'quality increase by 1' do
+        it 'quality increase by 3' do
           expect(items[0].quality).to eq 23
         end
       end
@@ -122,7 +134,7 @@ RSpec.describe "GildedRose" do
       end
     end
 
-    context 'with All Items' do
+    context 'Quality Limits' do
       let!(:items) do
         [
           Item.new("+5 Dexterity Vest", 10, 0),
@@ -144,6 +156,12 @@ RSpec.describe "GildedRose" do
     it_should_behave_like 'A Conjured Item', DummyItem.new(3, 6) do
       let(:items) do
         [Item.new("Conjured Mana Cake", 3, 6)]
+      end
+    end
+
+    it_should_behave_like 'A Conjured Item', DummyItem.new(0, 6) do
+      let(:items) do
+        [Item.new("Conjured Mana Cake", 0, 6)]
       end
     end
 
